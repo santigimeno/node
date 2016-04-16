@@ -34,8 +34,7 @@ test(function serverTimeout(cb) {
   var s = server.setTimeout(50, function(socket) {
     caughtTimeout = true;
     socket.destroy();
-    server.close();
-    cb();
+    server.close(cb);
   });
   assert.ok(s instanceof http.Server);
   http.get({ port: common.PORT }).on('error', function() {});
@@ -51,8 +50,7 @@ test(function serverRequestTimeout(cb) {
     var s = req.setTimeout(50, function() {
       caughtTimeout = true;
       req.socket.destroy();
-      server.close();
-      cb();
+      server.close(cb);
     });
     assert.ok(s instanceof http.IncomingMessage);
   });
@@ -73,8 +71,7 @@ test(function serverResponseTimeout(cb) {
     var s = res.setTimeout(50, function() {
       caughtTimeout = true;
       res.socket.destroy();
-      server.close();
-      cb();
+      server.close(cb);
     });
     assert.ok(s instanceof http.OutgoingMessage);
   });
@@ -101,8 +98,7 @@ test(function serverRequestNotTimeoutAfterEnd(cb) {
   });
   server.on('timeout', function(socket) {
     socket.destroy();
-    server.close();
-    cb();
+    server.close(cb);
   });
   server.listen(common.PORT);
   http.get({ port: common.PORT }).on('error', function() {});
@@ -122,8 +118,7 @@ test(function serverResponseTimeoutWithPipeline(cb) {
   });
   server.on('timeout', function(socket) {
     socket.destroy();
-    server.close();
-    cb();
+    server.close(cb);
   });
   server.listen(common.PORT);
   var c = net.connect({ port: common.PORT, allowHalfOpen: true }, function() {
@@ -154,8 +149,7 @@ test(function idleTimeout(cb) {
   var s = server.setTimeout(50, function(socket) {
     caughtTimeoutOnServer = true;
     socket.destroy();
-    server.close();
-    cb();
+    server.close(cb);
   });
   assert.ok(s instanceof http.Server);
   server.listen(common.PORT);
