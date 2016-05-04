@@ -23,8 +23,9 @@ interfacer.stderr.on('data', onData);
 
 interfacer.on('line', function(line) {
   line = line.replace(/^(debug> *)+/, '');
-  var expected = 'Target process: 655555 doesn\'t exist.';
-  assert.ok(expected == line, 'Got unexpected line: ' + line);
+  var pid = interfacer.pid;
+  var expected = `(node:${pid}) Target process: 655555 doesn\'t exist.`;
+  assert.strictEqual(expected, line);
 });
 
 interfacer.on('exit', function(code, signal) {
