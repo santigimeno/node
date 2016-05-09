@@ -21,15 +21,30 @@ var onData = function(data) {
 interfacer.stdout.on('data', onData);
 interfacer.stderr.on('data', onData);
 
+var lineCount = 0;
 interfacer.on('line', function(line) {
+  var expected;
+  const pid = interfacer.pid;
   if (common.isWindows) {
-    console.error(line);
+    switch (++lineCount) {
+      case 1:
+        line = line.replace(/^(debug> *)+/, '');
+        expected = `(node:${pid}) There was an internal error in Node's debugger. Please report this bug.`;
+      break;
+
+      case 2:
+        expected = line;
+      break;
+
+      default:
+        return;
+    }
   } else {
     line = line.replace(/^(debug> *)+/, '');
-    var pid = interfacer.pid;
-    var expected = `(node:${pid}) Target process: 655555 doesn\'t exist.`;
-    assert.strictEqual(expected, line);
+    expected = `(node:${pid}) Target process: 655555 doesn\'t exist.`;
   }
+
+  assert.strictEqual(expected, line);
 });
 
 interfacer.on('exit', function(code, signal) {
