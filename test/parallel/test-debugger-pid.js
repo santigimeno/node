@@ -29,8 +29,9 @@ interfacer.on('line', function(line) {
     switch (++lineCount) {
       case 1:
         line = line.replace(/^(debug> *)+/, '');
-        expected = `(node:${pid}) There was an internal error in Node's \
-                    debugger. Please report this bug.`;
+        var msg = 'There was an internal error in Node's debugger. ' +
+                  'Please report this bug.';
+        expected = `(node:${pid}) ${msg}`;
       break;
 
       case 2:
