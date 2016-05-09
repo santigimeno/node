@@ -49,7 +49,4 @@ interfacer.on('line', function(line) {
 
 interfacer.on('exit', function(code, signal) {
   assert.ok(code == 1, 'Got unexpected code: ' + code);
-  if (common.isWindows) {
-    throw new Error('TESTING');
-  }
 });
