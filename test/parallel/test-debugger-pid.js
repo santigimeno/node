@@ -1,7 +1,7 @@
 'use strict';
-require('../common');
-var assert = require('assert');
-var spawn = require('child_process').spawn;
+const common = require('../common');
+const assert = require('assert');
+const spawn = require('child_process').spawn;
 
 var buffer = '';
 
@@ -22,12 +22,19 @@ interfacer.stdout.on('data', onData);
 interfacer.stderr.on('data', onData);
 
 interfacer.on('line', function(line) {
-  line = line.replace(/^(debug> *)+/, '');
-  var pid = interfacer.pid;
-  var expected = `(node:${pid}) Target process: 655555 doesn\'t exist.`;
-  assert.strictEqual(expected, line);
+  if (common.isWindows) {
+    console.error(line);
+  } else {
+    line = line.replace(/^(debug> *)+/, '');
+    var pid = interfacer.pid;
+    var expected = `(node:${pid}) Target process: 655555 doesn\'t exist.`;
+    assert.strictEqual(expected, line);
+  }
 });
 
 interfacer.on('exit', function(code, signal) {
   assert.ok(code == 1, 'Got unexpected code: ' + code);
+  if (common.isWindows) {
+    throw new Error('TESTING');
+  }
 });
