@@ -4,6 +4,11 @@ const assert = require('assert');
 const fork = require('child_process').fork;
 const net = require('net');
 
+if ('67'.includes(process.config.variables.arm_version)) {
+  common.skip('Too slow for armv6 and armv7 bots');
+  return;
+}
+
 const N = 80;
 
 if (process.argv[2] !== 'child') {
