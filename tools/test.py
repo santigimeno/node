@@ -196,7 +196,7 @@ class SimpleProgressIndicator(ProgressIndicator):
         print failed.output.stdout.strip()
       print "Command: %s" % EscapeCommand(failed.command)
       if failed.HasCrashed():
-        print "--- CRASHED ---"
+        print "--- CRASHED (Signal: %d) ---" % -failed.output.exit_code
       if failed.HasTimedOut():
         print "--- TIMEOUT ---"
     if len(self.failed) == 0:
@@ -347,7 +347,7 @@ class CompactProgressIndicator(ProgressIndicator):
         print self.templates['stderr'] % stderr
       print "Command: %s" % EscapeCommand(output.command)
       if output.HasCrashed():
-        print "--- CRASHED ---"
+        print "--- CRASHED (Signal: %d) ---" % -output.output.exit_code
       if output.HasTimedOut():
         print "--- TIMEOUT ---"
 
