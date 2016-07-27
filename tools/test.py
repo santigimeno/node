@@ -285,6 +285,9 @@ class TapProgressIndicator(SimpleProgressIndicator):
       logger.info(status_line)
       self._printDiagnostic("\n".join(output.diagnostic))
 
+      if output.HasCrashed():
+	self._printDiagnostic('CRASHED (Signal: %d)' % -output.output.exit_code)
+
       if output.HasTimedOut():
         self._printDiagnostic('TIMEOUT')
 
