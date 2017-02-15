@@ -623,7 +623,7 @@ def RunProcess(context, timeout, args, **rest):
     **rest
   )
 
-  print 'Closing pipe_read %d' % pipe_read
+  # print 'Closing pipe_read %d' % pipe_read
   os.close(pipe_read);
   if faketty:
     os.close(rest['stdout'])
@@ -664,8 +664,8 @@ def RunProcess(context, timeout, args, **rest):
   while exit_code is None:
     if (not end_time is None) and (time.time() >= end_time):
       # Kill the process and wait for it to exit.
-    #   KillTimedOutProcess(context, process.pid)
-      print 'Closing pipe_write %d' % pipe_write
+    # #   KillTimedOutProcess(context, process.pid)
+    #   print 'Closing pipe_write %d' % pipe_write
       os.close(pipe_write);
       exit_code = process.wait()
       timed_out = True
