@@ -614,12 +614,17 @@ def RunProcess(context, timeout, args, **rest):
 
   faketty = rest.pop('faketty', False)
   pty_out = rest.pop('pty_out')
+  pipe_read = rest.pop('pipe_read')
+  pipe_write = rest.pop('pipe_write')
 
   process = subprocess.Popen(
     shell = utils.IsWindows(),
     args = popen_args,
     **rest
   )
+
+  print 'Closing pipe_read %d' % pipe_read
+  os.close(pipe_read);
   if faketty:
     os.close(rest['stdout'])
   if utils.IsWindows() and context.suppress_dialogs and prev_error_mode != SEM_INVALID_VALUE:
@@ -659,10 +664,9 @@ def RunProcess(context, timeout, args, **rest):
   while exit_code is None:
     if (not end_time is None) and (time.time() >= end_time):
       # Kill the process and wait for it to exit.
-      if faketty:
-        KillTimedOutProcess(context, process.pid)
-      else:
-        process.stdin.close()
+    #   KillTimedOutProcess(context, process.pid)
+      print 'Closing pipe_write %d' % pipe_write
+      os.close(pipe_write);
       exit_code = process.wait()
       timed_out = True
     else:
@@ -700,9 +704,10 @@ def Execute(args, context, timeout=None, env={}, faketty=False):
     fd_in = fd_err = fd_out
     pty_out = out_master
   else:
+    (pipe_read, pipe_write) = os.pipe()
     (fd_out, outname) = tempfile.mkstemp()
     (fd_err, errname) = tempfile.mkstemp()
-    fd_in = subprocess.PIPE
+    fd_in = 0
     pty_out = None
 
   # Extend environment
@@ -719,7 +724,9 @@ def Execute(args, context, timeout=None, env={}, faketty=False):
     stderr = fd_err,
     env = env_copy,
     faketty = faketty,
-    pty_out = pty_out
+    pty_out = pty_out,
+    pipe_read = pipe_read,
+    pipe_write = pipe_write
   )
   if faketty:
     os.close(out_master)
@@ -1605,16 +1612,16 @@ def Main():
         if not exists(vm):
           print "Can't find shell executable: '%s'" % vm
           continue
-        archEngineContext = Execute([vm, "-p", "process.arch"], context)
-        vmArch = archEngineContext.stdout.rstrip()
-        if archEngineContext.exit_code is not 0 or vmArch == "undefined":
-          print "Can't determine the arch of: '%s'" % vm
-          print archEngineContext.stderr.rstrip()
-          continue
+        # archEngineContext = Execute([vm, "-p", "process.arch"], context)
+        # vmArch = archEngineContext.stdout.rstrip()
+        # if archEngineContext.exit_code is not 0 or vmArch == "undefined":
+        #   print "Can't determine the arch of: '%s'" % vm
+        #   print archEngineContext.stderr.rstrip()
+        #   continue
         env = {
           'mode': mode,
           'system': utils.GuessOS(),
-          'arch': vmArch,
+        #   'arch': vmArch,
         }
         test_list = root.ListTests([], path, context, arch, mode)
         unclassified_tests += test_list

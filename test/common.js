@@ -403,13 +403,18 @@ process.on('exit', function() {
 
 const mustCallChecks = [];
 
-// pipe connected to the test runner. If the pipe closes, the test 
+// pipe connected to the test runner. If the pipe closes, the test
 // times out.
-process.stdin.unref();
-process.stdin.resume();
-process.stdin.on('end', () => {
+const net = require('net');
+const pipe_read = new net.Socket({ fd : 3 });
+pipe_read.unref();
+pipe_read.on('end', () => {
   process.exit(0);
 });
+
+const pipe_write = new net.Socket({ fd : 4 });
+pipe_write.unref();
+pipe_write.destroy();
 
 
 function runCallChecks(exitCode) {
