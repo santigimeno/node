@@ -9,3 +9,7 @@ const req = new WriteWrap();
 
 handle.writeBuffer(req, Buffer.from('hello world 1\n'));
 handle.writeBuffer(req, Buffer.from('hello world 2\n'));
+
+setTimeout(() => {
+
+}, 1000000);

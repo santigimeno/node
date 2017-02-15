@@ -639,6 +639,8 @@ def RunProcess(context, timeout, args, **rest):
       if time.time() >= end_time:
         # Kill the process and wait for it to exit.
         KillTimedOutProcess(context, process.pid)
+        print 'faketty'
+        # process.stdin.close()
         exit_code = process.wait()
         timed_out = True
         break
@@ -659,7 +661,9 @@ def RunProcess(context, timeout, args, **rest):
   while exit_code is None:
     if (not end_time is None) and (time.time() >= end_time):
       # Kill the process and wait for it to exit.
-      KillTimedOutProcess(context, process.pid)
+      # KillTimedOutProcess(context, process.pid)
+      print 'adios'
+      process.stdin.close()
       exit_code = process.wait()
       timed_out = True
     else:
@@ -699,7 +703,7 @@ def Execute(args, context, timeout=None, env={}, faketty=False):
   else:
     (fd_out, outname) = tempfile.mkstemp()
     (fd_err, errname) = tempfile.mkstemp()
-    fd_in = 0
+    fd_in = subprocess.PIPE
     pty_out = None
 
   # Extend environment

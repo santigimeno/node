@@ -403,6 +403,14 @@ process.on('exit', function() {
 
 const mustCallChecks = [];
 
+// pipe connected to the test runner. If the pipe closes, the test 
+// times out.
+process.stdin.unref();
+process.stdin.resume();
+process.stdin.on('end', () => {
+  process.exit(0);
+});
+
 
 function runCallChecks(exitCode) {
   if (exitCode !== 0) return;
