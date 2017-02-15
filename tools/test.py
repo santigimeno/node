@@ -698,7 +698,8 @@ def Execute(args, context, timeout=None, env={}, faketty=False):
   if faketty:
     import pty
     (out_master, fd_out) = pty.openpty()
-    fd_in = fd_err = fd_out
+    fd_err = fd_out
+    fd_in = subprocess.PIPE
     pty_out = out_master
   else:
     (fd_out, outname) = tempfile.mkstemp()
