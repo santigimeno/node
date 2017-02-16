@@ -14,7 +14,7 @@ if (process.argv[2] === 'fork') {
 } else {
   const execArgv = ['--stack-size=256'];
   const args = [__filename, 'child', 'arg0'];
-
+  
   const child = spawn(process.execPath, execArgv.concat(args));
   let out = '';
 

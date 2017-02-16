@@ -666,7 +666,9 @@ def RunProcess(context, timeout, args, **rest):
       # Kill the process and wait for it to exit.
     # #   KillTimedOutProcess(context, process.pid)
     #   print 'Closing pipe_write %d' % pipe_write
-      os.close(pipe_write);
+      w = os.fdopen(pipe_write, 'w');
+      w.write('timeout');
+      w.close();
       exit_code = process.wait()
       timed_out = True
     else:
@@ -675,6 +677,9 @@ def RunProcess(context, timeout, args, **rest):
       sleep_time = sleep_time * SLEEP_TIME_FACTOR
       if sleep_time > MAX_SLEEP_TIME:
         sleep_time = MAX_SLEEP_TIME
+
+  if timed_out is not True:
+    os.close(pipe_write);
   return (process, exit_code, timed_out, output)
 
 
@@ -703,6 +708,8 @@ def Execute(args, context, timeout=None, env={}, faketty=False):
     (out_master, fd_out) = pty.openpty()
     fd_in = fd_err = fd_out
     pty_out = out_master
+    pipe_read = None
+    pipe_write = None
   else:
     (pipe_read, pipe_write) = os.pipe()
     (fd_out, outname) = tempfile.mkstemp()
@@ -1612,16 +1619,16 @@ def Main():
         if not exists(vm):
           print "Can't find shell executable: '%s'" % vm
           continue
-        # archEngineContext = Execute([vm, "-p", "process.arch"], context)
-        # vmArch = archEngineContext.stdout.rstrip()
-        # if archEngineContext.exit_code is not 0 or vmArch == "undefined":
-        #   print "Can't determine the arch of: '%s'" % vm
-        #   print archEngineContext.stderr.rstrip()
-        #   continue
+        archEngineContext = Execute([vm, "-p", "process.arch"], context)
+        vmArch = archEngineContext.stdout.rstrip()
+        if archEngineContext.exit_code is not 0 or vmArch == "undefined":
+          print "Can't determine the arch of: '%s'" % vm
+          print archEngineContext.stderr.rstrip()
+          continue
         env = {
           'mode': mode,
           'system': utils.GuessOS(),
-        #   'arch': vmArch,
+          'arch': vmArch,
         }
         test_list = root.ListTests([], path, context, arch, mode)
         unclassified_tests += test_list

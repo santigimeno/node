@@ -405,16 +405,21 @@ const mustCallChecks = [];
 
 // pipe connected to the test runner. If the pipe closes, the test
 // times out.
-const net = require('net');
-const pipe_read = new net.Socket({ fd : 3 });
-pipe_read.unref();
-pipe_read.on('end', () => {
-  process.exit(0);
-});
+const cluster = require('cluster');
+if (cluster.isMaster && process.argv.length === 2 && !process.argv[1].includes('fixtures')) {
+    const net = require('net');
+    const pipe_read = new net.Socket({ fd : 3 });
+    pipe_read.unref();
+    pipe_read.on('data', (d) => {
+        if (d.toString() === 'timeout') {
+            process.exit(0);
+        }
+    });
 
-const pipe_write = new net.Socket({ fd : 4 });
-pipe_write.unref();
-pipe_write.destroy();
+    const pipe_write = new net.Socket({ fd : 4 });
+    pipe_write.unref();
+    pipe_write.destroy();
+}
 
 
 function runCallChecks(exitCode) {
