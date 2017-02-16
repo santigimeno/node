@@ -726,6 +726,11 @@ def Execute(args, context, timeout=None, env={}, faketty=False):
   for key, value in env.iteritems():
     env_copy[key] = value
 
+  if pipe_read:
+    env_copy['TEST_RUNNER_PIPE_READ'] = "%d" % pipe_read;
+  if pipe_write:
+    env_copy['TEST_RUNNER_PIPE_WRITE'] = "%d" % pipe_write;
+    
   (process, exit_code, timed_out, output) = RunProcess(
     context,
     timeout,
