@@ -408,17 +408,31 @@ const mustCallChecks = [];
 const cluster = require('cluster');
 if (cluster.isMaster && process.argv.length === 2 && !process.argv[1].includes('fixtures') && !process.argv[1].includes('pseudo-tty')) {
     const net = require('net');
-    const pipe_read = new net.Socket({ fd : 3 });
-    pipe_read.unref();
-    pipe_read.on('data', (d) => {
+
+    function get_parent_pipe(fd) {
+        fd = fd || 5;
+        try {
+            new net.Socket({ fd : fd });
+        } catch (e) {
+            return {
+                read : new net.Socket({ fd : fd - 2 }),
+                write : new net.Socket({ fd : fd - 1 })
+            };
+        }
+
+        return get_parent_pipe(fd + 1);
+    }
+
+    const pipe = get_parent_pipe();
+    pipe.read.unref();
+    pipe.read.on('data', (d) => {
         if (d.toString() === 'timeout') {
             process.exit(0);
         }
     });
 
-    const pipe_write = new net.Socket({ fd : 4 });
-    pipe_write.unref();
-    pipe_write.destroy();
+    pipe.write.unref();
+    pipe.write.destroy();
 }
 
 
