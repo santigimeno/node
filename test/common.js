@@ -10,6 +10,7 @@ const buffer = require('buffer');
 const util = require('util');
 const Timer = process.binding('timer_wrap').Timer;
 const execSync = require('child_process').execSync;
+const Pipe = process.binding('pipe_wrap').Pipe;
 
 const testRoot = process.env.NODE_TEST_DIR ?
                    fs.realpathSync(process.env.NODE_TEST_DIR) : __dirname;
@@ -405,34 +406,34 @@ const mustCallChecks = [];
 
 // pipe connected to the test runner. If the pipe closes, the test
 // times out.
-const cluster = require('cluster');
-if (cluster.isMaster && process.argv.length === 2 && !process.argv[1].includes('fixtures') && !process.argv[1].includes('pseudo-tty')) {
-    const net = require('net');
+if (process.env.TEST_RUNNER_PIPE_READ &&
+    process.env.TEST_RUNNER_PIPE_WRITE) {
+    // const net = require('net');
 
-    function get_parent_pipe(fd) {
-        fd = fd || 5;
-        try {
-            new net.Socket({ fd : fd });
-        } catch (e) {
-            return {
-                read : new net.Socket({ fd : fd - 2 }),
-                write : new net.Socket({ fd : fd - 1 })
-            };
-        }
 
-        return get_parent_pipe(fd + 1);
+    function get_pipe(fd) {
+        var p = new Pipe(true);
+        p.open(parseInt(fd, 10));
+        p.unref();
+        return p;
     }
 
-    const pipe = get_parent_pipe();
-    pipe.read.unref();
-    pipe.read.on('data', (d) => {
-        if (d.toString() === 'timeout') {
-            process.exit(0);
-        }
-    });
+    const pipe_read = get_pipe(process.env.TEST_RUNNER_PIPE_READ);
+    delete process.env.TEST_RUNNER_PIPE_READ;
+    const pipe_write = get_pipe(process.env.TEST_RUNNER_PIPE_WRITE);
+    delete process.env.TEST_RUNNER_PIPE_WRITE;
+    console.log(pipe_read);
+    // process.exit(1);
+    pipe_read.onread = function(nread, data) {
+        console.log(nread, data);
+        // if (d.toString() === 'timeout') {
+        //     process.exit(0);
+        // }
+    };
 
-    pipe.write.unref();
-    pipe.write.destroy();
+    pipe_read.readStart();
+
+    pipe_write.close();
 }
 
 
