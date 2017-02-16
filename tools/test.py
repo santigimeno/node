@@ -624,7 +624,8 @@ def RunProcess(context, timeout, args, **rest):
   )
 
   # print 'Closing pipe_read %d' % pipe_read
-  os.close(pipe_read);
+  if pipe_read:
+      os.close(pipe_read);
   if faketty:
     os.close(rest['stdout'])
   if utils.IsWindows() and context.suppress_dialogs and prev_error_mode != SEM_INVALID_VALUE:
@@ -666,9 +667,12 @@ def RunProcess(context, timeout, args, **rest):
       # Kill the process and wait for it to exit.
     # #   KillTimedOutProcess(context, process.pid)
     #   print 'Closing pipe_write %d' % pipe_write
-      w = os.fdopen(pipe_write, 'w');
-      w.write('timeout');
-      w.close();
+      if pipe_write:
+          w = os.fdopen(pipe_write, 'w');
+          w.write('timeout');
+          w.close();
+      else:
+          KillTimedOutProcess(context, process.pid)
       exit_code = process.wait()
       timed_out = True
     else:
@@ -678,7 +682,7 @@ def RunProcess(context, timeout, args, **rest):
       if sleep_time > MAX_SLEEP_TIME:
         sleep_time = MAX_SLEEP_TIME
 
-  if timed_out is not True:
+  if pipe_write and timed_out is not True:
     os.close(pipe_write);
   return (process, exit_code, timed_out, output)
 

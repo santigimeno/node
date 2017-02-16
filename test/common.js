@@ -406,7 +406,7 @@ const mustCallChecks = [];
 // pipe connected to the test runner. If the pipe closes, the test
 // times out.
 const cluster = require('cluster');
-if (cluster.isMaster && process.argv.length === 2 && !process.argv[1].includes('fixtures')) {
+if (cluster.isMaster && process.argv.length === 2 && !process.argv[1].includes('fixtures') && !process.argv[1].includes('pseudo-tty')) {
     const net = require('net');
     const pipe_read = new net.Socket({ fd : 3 });
     pipe_read.unref();
