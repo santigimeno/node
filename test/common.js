@@ -406,33 +406,21 @@ const mustCallChecks = [];
 
 // pipe connected to the test runner. If the pipe closes, the test
 // times out.
-if (process.env.TEST_RUNNER_PIPE_READ &&
-    process.env.TEST_RUNNER_PIPE_WRITE) {
-    // const net = require('net');
-
-
-    function get_pipe(fd) {
-        var p = new Pipe(true);
-        p.open(parseInt(fd, 10));
-        p.unref();
-        return p;
-    }
-
-    const pipe_read = get_pipe(process.env.TEST_RUNNER_PIPE_READ);
+if (process.env.TEST_RUNNER_PIPE_READ) {
+    console.log('TEST_RUNNER_PIPE_READ: %s', process.env.TEST_RUNNER_PIPE_READ);
+    const net = require('net');
+    const pipe_read = new net.Socket({ fd : process.env.TEST_RUNNER_PIPE_READ });
     delete process.env.TEST_RUNNER_PIPE_READ;
-    const pipe_write = get_pipe(process.env.TEST_RUNNER_PIPE_WRITE);
-    delete process.env.TEST_RUNNER_PIPE_WRITE;
-    console.log(pipe_read);
-    // process.exit(1);
-    pipe_read.readStart();
-    pipe_read.onread = function(nread, data) {
-        console.log(nread, data);
-        // if (d.toString() === 'timeout') {
-        //     process.exit(0);
-        // }
-    };
-
-    pipe_write.close();
+    pipe_read.unref();
+    var data = '';
+    pipe_read.on('data', (d) => {
+        data += d;
+    });
+    pipe_read.on('end', () => {
+        if (data.toString() === 'timeout') {
+            process.exit(0);
+        }
+    });
 }
 
 

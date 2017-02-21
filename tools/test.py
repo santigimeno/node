@@ -730,11 +730,15 @@ def Execute(args, context, timeout=None, env={}, faketty=False):
     pipe_read = None
     pipe_write = None
   else:
-    (pipe_read, pipe_write) = os.pipe()
     (fd_out, outname) = tempfile.mkstemp()
     (fd_err, errname) = tempfile.mkstemp()
     fd_in = 0
     pty_out = None
+    (pipe_read, pipe_write) = os.pipe()
+    if sys.platform != "win32":
+        from fcntl import fcntl, F_SETFD, FD_CLOEXEC
+        fcntl(pipe_write, F_SETFD, FD_CLOEXEC)
+
 
   # Extend environment
   env_copy = os.environ.copy()
@@ -743,8 +747,6 @@ def Execute(args, context, timeout=None, env={}, faketty=False):
 
   if pipe_read:
     env_copy['TEST_RUNNER_PIPE_READ'] = "%d" % PreparePipeFd(pipe_read);
-  if pipe_write:
-    env_copy['TEST_RUNNER_PIPE_WRITE'] = "%d" % PreparePipeFd(pipe_write);
 
   (process, exit_code, timed_out, output) = RunProcess(
     context,
