@@ -44,6 +44,10 @@ import multiprocessing
 import errno
 import copy
 
+if sys.platform == "win32":
+    import msvcrt
+    import _subprocess
+
 from os.path import join, dirname, abspath, basename, isdir, exists
 from datetime import datetime
 from Queue import Queue, Empty
@@ -706,6 +710,17 @@ def CheckedUnlink(name):
       PrintError("os.unlink() " + str(e))
     break
 
+def PreparePipeFd(pipe_fd):
+  if sys.platform == "win32":
+    curproc = _subprocess.GetCurrentProcess()
+    handle = msvcrt.get_osfhandle(pipe_fd)
+    dup_handle = _subprocess.DuplicateHandle(curproc, handle, curproc, 0, 1,
+        _subprocess.DUPLICATE_SAME_ACCESS)
+    print 'PreparePipeFd: %d, %d, %d', (pipe_fd, handle, int(dup_handle))
+    return int(dup_handle)
+  else:
+    return pipe_fd
+
 def Execute(args, context, timeout=None, env={}, faketty=False):
   if faketty:
     import pty
@@ -727,10 +742,10 @@ def Execute(args, context, timeout=None, env={}, faketty=False):
     env_copy[key] = value
 
   if pipe_read:
-    env_copy['TEST_RUNNER_PIPE_READ'] = "%d" % pipe_read;
+    env_copy['TEST_RUNNER_PIPE_READ'] = "%d" % PreparePipeFd(pipe_read);
   if pipe_write:
-    env_copy['TEST_RUNNER_PIPE_WRITE'] = "%d" % pipe_write;
-    
+    env_copy['TEST_RUNNER_PIPE_WRITE'] = "%d" % PreparePipeFd(pipe_write);
+
   (process, exit_code, timed_out, output) = RunProcess(
     context,
     timeout,

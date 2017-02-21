@@ -424,14 +424,13 @@ if (process.env.TEST_RUNNER_PIPE_READ &&
     delete process.env.TEST_RUNNER_PIPE_WRITE;
     console.log(pipe_read);
     // process.exit(1);
+    pipe_read.readStart();
     pipe_read.onread = function(nread, data) {
         console.log(nread, data);
         // if (d.toString() === 'timeout') {
         //     process.exit(0);
         // }
     };
-
-    pipe_read.readStart();
 
     pipe_write.close();
 }
