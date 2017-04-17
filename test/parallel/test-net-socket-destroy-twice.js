@@ -23,10 +23,15 @@
 const common = require('../common');
 const net = require('net');
 
-const conn = net.createConnection(common.PORT);
+const s = net.createServer();
+s.listen(0);
+const port = s.address().port;
+s.close(() => {
+  const conn = net.createConnection(port);
 
-conn.on('error', common.mustCall(function() {
-  conn.destroy();
-}));
+  conn.on('error', common.mustCall(() => {
+    conn.destroy();
+  }));
 
-conn.on('close', common.mustCall());
+  conn.on('close', common.mustCall());
+});

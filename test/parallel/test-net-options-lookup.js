@@ -10,11 +10,11 @@ const expectedError = /^TypeError: "lookup" option should be a function$/;
 function connectThrows(input) {
   const opts = {
     host: 'localhost',
-    port: common.PORT,
+    port: 0,
     lookup: input
   };
 
-  assert.throws(function() {
+  assert.throws(() => {
     net.connect(opts);
   }, expectedError);
 }
@@ -24,11 +24,11 @@ connectDoesNotThrow(common.noop);
 function connectDoesNotThrow(input) {
   const opts = {
     host: 'localhost',
-    port: common.PORT,
+    port: 0,
     lookup: input
   };
 
-  assert.doesNotThrow(function() {
+  assert.doesNotThrow(() => {
     net.connect(opts);
   });
 }
