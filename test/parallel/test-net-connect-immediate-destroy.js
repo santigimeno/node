@@ -5,8 +5,7 @@ const net = require('net');
 const s = net.createServer();
 s.listen(0);
 const port = s.address().port;
-s.close(() => {
-  const socket = net.connect(port, common.localhostIPv4, common.mustNotCall());
-  socket.on('error', common.mustNotCall());
-  socket.destroy();
-});
+const socket = net.connect(0, common.localhostIPv4, common.mustNotCall());
+socket.on('error', common.mustNotCall());
+s.close();
+socket.destroy();
