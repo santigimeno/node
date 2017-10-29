@@ -101,11 +101,11 @@ function expect(expected) {
 
 {
   const ee = new events.EventEmitter();
-  ee.on('removeListener', function(name, noop, isOnce) {
+  ee.on('removeListener', common.mustCall(function(name, noop, isOnce) {
     assert.strictEqual(name, 'baz');
     assert.strictEqual(isOnce, true);
     assert.strictEqual(ee.listeners('baz').length, 0);
-  });
+  }));
 
   ee.once('baz', common.mustNotCall());
   ee.removeAllListeners('baz');

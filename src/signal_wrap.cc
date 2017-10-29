@@ -27,6 +27,7 @@
 
 namespace node {
 
+using v8::Boolean;
 using v8::Context;
 using v8::FunctionCallbackInfo;
 using v8::FunctionTemplate;
@@ -87,7 +88,8 @@ class SignalWrap : public HandleWrap {
     SignalWrap* wrap;
     ASSIGN_OR_RETURN_UNWRAP(&wrap, args.Holder());
     int signum = args[0]->Int32Value();
-    bool oneshot = args[1]->BooleanValue();
+    CHECK(args[1]->IsBoolean());
+    bool oneshot = args[1].As<Boolean>()->Value();
 #if defined(__POSIX__) && HAVE_INSPECTOR
     if (signum == SIGPROF) {
       Environment* env = Environment::GetCurrent(args);

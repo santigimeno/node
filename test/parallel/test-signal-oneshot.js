@@ -7,15 +7,15 @@ const spawn = require('child_process').spawn;
 
 if (process.argv[2] === 'child') {
   if (process.argv[3] === 'once') {
-    const on_sigint = common.mustCall(() => {
-      process.removeListener('SIGINT', on_sigint);
-    });
-
+    const on_sigint = () => {};
     process.on('SIGINT', on_sigint);
     process.once('SIGINT', common.mustCall(() => {
-      process.send('signal');
-      while (true) {}
     }));
+
+    process.removeListener('SIGINT', on_sigint);
+    process.send('signal', () => {
+      while (true) {}
+    });
   } else if (process.argv[3] === 'on') {
     let signals = 0;
     process.once('SIGINT', common.mustCall(() => {
