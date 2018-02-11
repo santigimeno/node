@@ -163,6 +163,7 @@ class ModuleWrap;
   V(inherit_string, "inherit")                                                \
   V(input_string, "input")                                                    \
   V(internal_string, "internal")                                              \
+  V(ipc_string, "ipc")                                                        \
   V(ipv4_string, "IPv4")                                                      \
   V(ipv6_string, "IPv6")                                                      \
   V(isclosing_string, "isClosing")                                            \

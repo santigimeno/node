@@ -110,8 +110,23 @@ class ProcessWrap : public HandleWrap {
       if (type->Equals(env->ignore_string())) {
         options->stdio[i].flags = UV_IGNORE;
       } else if (type->Equals(env->pipe_string())) {
-        options->stdio[i].flags = static_cast<uv_stdio_flags>(
-            UV_CREATE_PIPE | UV_READABLE_PIPE | UV_WRITABLE_PIPE);
+        Local<Value> ipc_val =
+            stdio->Get(context, env->ipc_string()).ToLocalChecked();
+        bool ipc = ipc_val->BooleanValue();
+        unsigned int flags = UV_CREATE_PIPE;
+        if (ipc) {
+          flags |= UV_READABLE_PIPE | UV_WRITABLE_PIPE;
+        } else {
+          if (i == 0)
+            flags |= UV_READABLE_PIPE;
+          else if (i == 1 || i == 2)
+            flags |= UV_WRITABLE_PIPE;
+          else
+            flags |= UV_READABLE_PIPE | UV_WRITABLE_PIPE;
+        }
+
+        options->stdio[i].flags = static_cast<uv_stdio_flags>(flags);
+
         Local<String> handle_key = env->handle_string();
         Local<Object> handle =
             stdio->Get(context, handle_key).ToLocalChecked().As<Object>();
