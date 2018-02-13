@@ -859,7 +859,11 @@ start:
   }
 
   if (n < 0) {
-    if (errno != EAGAIN && errno != EWOULDBLOCK && errno != ENOBUFS) {
+    if (errno != EAGAIN && errno != EWOULDBLOCK && errno != ENOBUFS
+#if defined(__APPLE__)
+        && !(errno == EMSGSIZE && req->send_handle)
+#endif
+       ) {
       err = -errno;
       goto error;
     } else if (stream->flags & UV_STREAM_BLOCKING) {
