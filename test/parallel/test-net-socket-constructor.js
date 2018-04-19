@@ -23,7 +23,7 @@ const server = net.createServer(common.mustCall((socket) => {
   test(socket, true, true);
   test({ handle: socket._handle }, false, false);
   test({ handle: socket._handle, readable: true, writable: true }, true, true);
-  if (socket._handle.fd !== undefined) {
+  if (socket._handle.fd >= 0) {
     test(socket._handle.fd, false, false);
     test({ fd: socket._handle.fd }, false, false);
     test({ fd: socket._handle.fd, readable: true, writable: true }, true, true);
